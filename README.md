@@ -73,3 +73,7 @@ The approach relies exclusively on classical machine learning and statistical me
 
 ## 📌 Conclusion
 This project demonstrates that meaningful financial stress indicators can be built using classical machine learning methods, combining quantitative and qualitative financial signals.
+
+## Team
+Hachicha Fayfa
+Berred Kenza
