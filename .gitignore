@@ -39,6 +39,9 @@ financial_env/
 *.swp
 *.swo
 *~
+# Modèles et MLflow
+models/
+mlruns/
 
 # Outputs (fichiers générés - ne pas pusher)
 outputs/figures/*.png
