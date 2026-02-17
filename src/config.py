@@ -12,9 +12,11 @@ OUTPUT_DIR = BASE_DIR / "outputs"
 FIGURES_DIR = OUTPUT_DIR / "figures"
 PROCESSED_DIR = OUTPUT_DIR / "processed_data"
 VECTORIZED_DIR = OUTPUT_DIR / "vectorized_data"
+MODELS_DIR = BASE_DIR / "models"
+MLFLOW_DIR = BASE_DIR / "mlruns"
 
 # Créer les dossiers s'ils n'existent pas
-for directory in [OUTPUT_DIR, FIGURES_DIR, PROCESSED_DIR, VECTORIZED_DIR]:
+for directory in [OUTPUT_DIR, FIGURES_DIR, PROCESSED_DIR, VECTORIZED_DIR, MODELS_DIR, MLFLOW_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
 # === FICHIERS NUMÉRIQUES ===
@@ -51,5 +53,22 @@ STYLE = "whitegrid"
 
 # === RANDOM STATE ===
 RANDOM_STATE = 42
+
+# === PARAMÈTRES MODÈLES ===
+TEST_SIZE            = 0.2
+CV_FOLDS             = 5
+
+# === PARAMÈTRES MLFLOW ===
+MLFLOW_TRACKING_URI    = MLFLOW_DIR.as_uri()
+MLFLOW_EXPERIMENT_NUM  = "financial_stress_numerical"
+MLFLOW_EXPERIMENT_TEXT = "financial_stress_textual"
+
+# === PARAMÈTRES FUSION ===
+WEIGHT_NUMERICAL = 0.6
+WEIGHT_TEXTUAL   = 0.4
+
+# Créer le dossier models
+MODELS_DIR = BASE_DIR / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 print(f"✅ Configuration chargée depuis : {BASE_DIR}")
