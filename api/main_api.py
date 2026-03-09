@@ -3,14 +3,18 @@ API FastAPI principale
 Financial Stress Detection
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from typing import Optional
 import sys
+import json
 from pathlib import Path
 
-# Ajouter src au path
+import os
+# Ajouter src au path (support local et Docker)
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
+sys.path.append('/app/src')
 
 from schemas import (
     NumericalInput, TextInput, FusedInput,
@@ -146,36 +150,64 @@ def health_check():
 
 @app.post("/predict/numerical",
           response_model=NumericalPrediction,
-          tags=["Prédictions"],
-          summary="Prédiction numérique (ratios financiers)")
-def predict_num_endpoint(input_data: NumericalInput):
-    """
-    ## 📊 Prédire le stress financier à partir de ratios financiers
-    
-    **Entrée** : 64 ratios financiers (liquidité, solvabilité, rentabilité, etc.)
-    
-    **Sortie** : Score de stress [0, 1], prédiction de faillite, interprétation
-    
-    ### Exemple de ratios
-    - Current Ratio
-    - Debt-to-Equity Ratio
-    - Return on Assets (ROA)
-    - Operating Margin
-    - ... (64 au total)
-    """
+          tags=["Prédictions"])
+async def predict_num_endpoint(
+    file: UploadFile = File(...),
+):
     try:
-        if len(input_data.features) != 64:
+        contents = await file.read()
+        filename = file.filename.lower()
+
+        # ── JSON ──────────────────────────────────────────
+        if filename.endswith('.json'):
+            data = json.loads(contents.decode('utf-8'))
+            if "features" not in data:
+                raise ValueError("JSON doit contenir une clé 'features'")
+            features = [float(x) for x in data["features"]]
+
+        # ── CSV ───────────────────────────────────────────
+        elif filename.endswith('.csv'):
+            import io
+            df = pd.read_csv(io.BytesIO(contents))
+            features = df.iloc[0].tolist()
+
+        # ── EXCEL ─────────────────────────────────────────
+        elif filename.endswith(('.xlsx', '.xls')):
+            import io
+            df = pd.read_excel(io.BytesIO(contents))
+            features = df.iloc[0].tolist()
+
+        # ── ARFF ──────────────────────────────────────────
+        elif filename.endswith('.arff'):
+            import io
+            from scipy.io import arff
+            data, meta = arff.loadarff(io.StringIO(contents.decode('utf-8')))
+            df = pd.DataFrame(data)
+            # Exclure la colonne cible si présente
+            numeric_cols = df.select_dtypes(include='number').columns
+            features = df[numeric_cols].iloc[0].tolist()
+
+        else:
             raise HTTPException(
                 status_code=400,
-                detail=f"Attendu 64 features, reçu {len(input_data.features)}"
+                detail="Format non supporté. Utilisez : .json, .csv, .xlsx ou .arff"
             )
-        
-        result = predict_numerical(input_data.features)
-        return result
-    
+
+        # ── Validation 64 features ────────────────────────
+        features = [float(x) for x in features]
+        if len(features) != 64:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Attendu 64 features, reçu {len(features)}"
+            )
+
+        return predict_numerical(features)
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+ 
 
 @app.post("/predict/text",
           response_model=TextPrediction,
@@ -207,56 +239,51 @@ def predict_text_endpoint(input_data: TextInput):
 @app.post("/predict/fused",
           response_model=FusedPrediction,
           tags=["Prédictions"],
-          summary="Prédiction fusionnée (numérique + textuelle)")
-def predict_fused_endpoint(input_data: FusedInput):
+          summary="Prédiction fusionnée (fichier JSON + texte)")
+async def predict_fused_endpoint(
+    file: UploadFile = File(...),
+    text: str = Form(...),
+    weight_num: float = Form(0.6),
+    weight_text: float = Form(0.4),
+):
     """
-    ## 🔀 Prédire le stress financier en combinant ratios ET texte
-    
-    **Entrée** :
-    - 64 ratios financiers
-    - Texte financier associé
-    - Poids de chaque signal (optionnel)
-    
-    **Sortie** :
-    - Score numérique
-    - Score textuel
-    - Score fusionné (combinaison pondérée)
-    - Analyse de divergence
-    
-    ### 🎯 Pourquoi fusionner ?
-    
-    La fusion permet de détecter les **incohérences** :
-    - Ratios sains mais sentiment négatif → alerte précoce
-    - Ratios dégradés mais sentiment positif → communication mensongère ?
+    Accepte :
+    - Un fichier JSON avec {"features": [64 floats]}
+    - Le texte en champ Form
+    - Les poids en champs Form
     """
     try:
-        if len(input_data.features) != 64:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Attendu 64 features, reçu {len(input_data.features)}"
-            )
-        
-        # Vérifier que les poids somment à 1
-        total_weight = input_data.weight_num + input_data.weight_text
-        if abs(total_weight - 1.0) > 0.01:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Les poids doivent sommer à 1.0 (actuellement: {total_weight})"
-            )
-        
+        # Validation poids
+        total = weight_num + weight_text
+        if abs(total - 1.0) > 0.01:
+            weight_num = weight_num / total
+            weight_text = weight_text / total
+
+        # Lecture fichier
+        contents = await file.read()
+        data = json.loads(contents.decode('utf-8'))
+
+        if "features" not in data or not isinstance(data["features"], list):
+            raise ValueError("JSON invalide : clé 'features' manquante ou pas une liste")
+
+        features = [float(x) for x in data["features"]]
+        if len(features) != 64:
+            raise HTTPException(status_code=400, detail=f"Attendu 64 features, reçu {len(features)}")
+
         result = predict_fused(
-            features=input_data.features,
-            text=input_data.text,
-            weight_num=input_data.weight_num,
-            weight_text=input_data.weight_text
+            features=features,
+            text=text,
+            weight_num=weight_num,
+            weight_text=weight_text
         )
         return result
-    
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Fichier JSON invalide")
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 # ══════════════════════════════════════════════════════════
 # LANCEMENT

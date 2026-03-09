@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 # === CHEMINS DE BASE ===
-BASE_DIR = Path(r"C:\Users\Anas\Desktop\bureau\fayfa\tek-up_2eme\financial_stress_project")
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Dossiers principaux
 DATA_DIR = BASE_DIR / "data"
@@ -59,7 +59,7 @@ TEST_SIZE            = 0.2
 CV_FOLDS             = 5
 
 # === PARAMÈTRES MLFLOW ===
-MLFLOW_TRACKING_URI    = MLFLOW_DIR.as_uri()
+MLFLOW_TRACKING_URI = MLFLOW_DIR.resolve().as_uri()
 MLFLOW_EXPERIMENT_NUM  = "financial_stress_numerical"
 MLFLOW_EXPERIMENT_TEXT = "financial_stress_textual"
 

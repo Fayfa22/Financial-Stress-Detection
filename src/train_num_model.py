@@ -152,7 +152,7 @@ def train_random_forest(X_train, y_train, X_test, y_test,
             param_grid,
             cv=config.CV_FOLDS,
             scoring='f1_weighted',
-            n_jobs=-1,
+            n_jobs=1,
             verbose=0
         )
         gs.fit(X_train, y_train)
@@ -238,7 +238,7 @@ def train_logistic_regression_num(X_train, y_train,
             param_grid,
             cv=config.CV_FOLDS,
             scoring='f1_weighted',
-            n_jobs=-1,
+            n_jobs=1,
             verbose=0
         )
         gs.fit(X_train, y_train)

@@ -1,0 +1,41 @@
+# Python
+
+**pycache**/
+_.pyc
+_.pyo
+_.pyd
+.Python
+env/
+venv/
+.env
+.venv
+_.log
+
+# Git
+
+.git/
+.gitignore
+
+# IDE
+
+.vscode/
+.idea/
+
+# Documentation
+
+\*.md
+README.md
+
+# Notebooks
+
+notebooks/
+
+# Données générées (trop volumineuses)
+
+mlruns/
+models/\*.pkl
+outputs/
+
+# Tests
+
+\*.pytest_cache

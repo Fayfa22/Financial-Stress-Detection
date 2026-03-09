@@ -9,8 +9,10 @@ import joblib
 import sys
 from pathlib import Path
 
-# Ajouter src au path
+import os
+# Ajouter src au path (support local et Docker)
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
+sys.path.append('/app/src')
 
 import config
 from preprocess_text import preprocess_text_pipeline
