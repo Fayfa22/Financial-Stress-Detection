@@ -12,15 +12,22 @@ from nltk.stem import WordNetLemmatizer
 import config
 
 # Télécharger les ressources NLTK
+for resource, path in [
+    ('punkt', 'tokenizers/punkt'),
+    ('stopwords', 'corpora/stopwords'),
+    ('wordnet', 'corpora/wordnet'),
+    ('omw-1.4', 'corpora/omw-1.4'),
+]:
+    try:
+        nltk.data.find(path)
+    except LookupError:
+        nltk.download(resource)
+
+# punkt_tab séparé car le chemin est différent
 try:
-    nltk.data.find('tokenizers/punkt')
-    nltk.data.find('corpora/wordnet')
-    nltk.data.find('corpora/omw-1.4')
-except LookupError:
-    nltk.download('punkt')
-    nltk.download('wordnet')
-    nltk.download('omw-1.4')
-    nltk.download('stopwords')
+    nltk.data.find('tokenizers/punkt_tab')
+except (LookupError, OSError):
+    nltk.download('punkt_tab')
 
 STOP_WORDS = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
