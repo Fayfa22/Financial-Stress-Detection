@@ -12,7 +12,9 @@
 
 <br/>
 
-> **A multimodal AI platform that detects financial stress in companies by fusing quantitative financial ratios and qualitative NLP signals — powered by classical machine learning, explainable AI (SHAP + TF-IDF), and a full-stack Docker deployment.**
+> **Academic Project — 2nd Year Engineering Cycle in Data Science & AI, Tek-Up University**
+>
+> A multimodal AI platform that detects financial stress in companies by fusing quantitative financial ratios and qualitative NLP signals — powered by classical machine learning, explainable AI (SHAP + TF-IDF), and a full-stack Docker deployment.
 
 <br/>
 
@@ -324,13 +326,28 @@ Full interactive documentation at **`http://localhost:8000/docs`**
 
 ---
 
+## 🎓 Academic Context
+
+This project was developed as part of the **2nd Year Engineering Cycle in Data Science & Artificial Intelligence** at **Tek-Up University**. It integrates skills acquired across the curriculum:
+
+| Domain | Applied Skills |
+|--------|---------------|
+| **Machine Learning** | Supervised learning, model selection, cross-validation, SMOTE |
+| **NLP** | Text preprocessing, TF-IDF vectorization, sentiment classification |
+| **Software Engineering** | REST API design, modular architecture, Docker containerization |
+| **Explainable AI** | SHAP values, feature importance, model transparency |
+| **DevOps** | Docker Compose, Nginx reverse proxy, multi-service deployment |
+| **Experiment Tracking** | MLflow runs, metrics logging, model versioning |
+
+---
+
 ## 👩‍💻 Author
 
 <div align="center">
 
-| | Name | University |
-|-|------|------------|
-| 👩‍💻 | **Hachicha Fayfa** | Tek-Up University — 2nd Year |
+| | Name | University | Program |
+|-|------|------------|---------|
+| 👩‍💻 | **Hachicha Fayfa** | Tek-Up University | 2nd Year Engineering Cycle — Data Science & AI |
 
 [![GitHub](https://img.shields.io/badge/GitHub-Fayfa22-181717?style=for-the-badge&logo=github)](https://github.com/Fayfa22)
 
